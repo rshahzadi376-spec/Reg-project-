@@ -128,7 +128,7 @@ with st.sidebar:
         st.success(f"✓ Loaded: {uploaded_file.name}")
     
     st.markdown("---")
-    st.markdown("<p style='font-size: 0.8rem; color: #9ca3af;'>• Max Limit: 200MB<br>• Protocol: Secure Vector Search<br>• Model: Gemini-2.5-Flash</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 0.8rem; color: #9ca3af;'>• Max Limit: 200MB<br>• Protocol: Secure Vector Search<br>• Model: Gemini Flash</p>", unsafe_allow_html=True)
 
 # Main Query Section
 st.markdown("### 💬 AI Query Interface")
@@ -149,15 +149,15 @@ user_question = st.text_input(
     placeholder="e.g., What are the main financial highlights and total revenue figures?"
 )
 
-# Button to get answer (Name changed back to "Get Answer") with Top 3 Chunks & Error Handling
+# Button to get answer with Top 3 Chunks & Error Handling
 if st.button("Get Answer"):
     if not user_question.strip():
         st.warning("Please enter a valid question first.")
     else:
         with st.spinner("Processing through secure RAG pipeline..."):
             try:
-                # Using stable flash model
-                model_name = "gemini-2.5-flash" 
+                # Using standard stable model name to prevent routing errors
+                model_name = "gemini-1.5-flash" 
                 
                 # Context prompt restricting to Microsoft 2025 Annual Report data
                 prompt = f"""
@@ -176,7 +176,7 @@ if st.button("Get Answer"):
                 st.markdown("### 📝 Verified Intelligence Output")
                 st.info(response.text)
                 
-                # Top 3 Relevant Chunks Display (As requested)
+                # Top 3 Relevant Chunks Display
                 st.markdown("#### 📂 Top 3 Relevant Chunks (Source Retrieval)")
                 
                 col_c1, col_c2, col_c3 = st.columns(3)
@@ -212,7 +212,7 @@ if st.button("Get Answer"):
                 error_str = str(e)
                 if "503" in error_str or "UNAVAILABLE" in error_str:
                     st.error("⚠️ Server is currently experiencing high demand (503 Service Unavailable). The security shield has caught this error safely. Please click 'Get Answer' again in a moment.")
-                elif "404" in error_str:
+                elif "404" in error_str or "routing" in error_str.lower():
                     st.error("⚠️ Model endpoint routing error encountered. Security fallback engaged. Please retry.")
                 else:
                     st.error(f"⚠️ An exception occurred and was safely handled: {error_str}")
