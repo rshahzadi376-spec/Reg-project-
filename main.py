@@ -5,7 +5,7 @@ import google.generativeai as genai
 
 # Page Configuration
 st.set_page_config(
-    page_title="Microsoft 2025 Annual Report | AI Command Center",
+    page_title="AI Knowledge Base System | AI Command Center",
     page_icon="🛡️",
     layout="wide"
 )
