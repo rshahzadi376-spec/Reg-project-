@@ -77,35 +77,6 @@ st.markdown("<h1 style='color: #06b6d4; font-weight: 800; letter-spacing: -0.5px
 st.markdown("<p style='color: #9ca3af; font-size: 1.05rem;'>Next-Generation Enterprise RAG Pipeline • Real-time Financial Document Intelligence</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Quick KPI Metric Cards Row
-col_m1, col_m2, col_m3 = st.columns(3)
-with col_m1:
-    st.markdown("""
-        <div class='metric-card'>
-            <p style='color: #9ca3af; font-size: 0.85rem; margin-bottom: 2px;'>TOTAL REVENUE (FY25)</p>
-            <h3 style='color: #34d399; margin: 0;'>$281.7 Billion</h3>
-            <span style='color: #10b981; font-size: 0.75rem;'>▲ +15% YoY Growth</span>
-        </div>
-    """, unsafe_allow_html=True)
-with col_m2:
-    st.markdown("""
-        <div class='metric-card'>
-            <p style='color: #9ca3af; font-size: 0.85rem; margin-bottom: 2px;'>AZURE CLOUD REVENUE</p>
-            <h3 style='color: #38bdf8; margin: 0;'>$75+ Billion</h3>
-            <span style='color: #0ea5e9; font-size: 0.75rem;'>▲ +34% YoY Growth</span>
-        </div>
-    """, unsafe_allow_html=True)
-with col_m3:
-    st.markdown("""
-        <div class='metric-card'>
-            <p style='color: #9ca3af; font-size: 0.85rem; margin-bottom: 2px;'>SYSTEM STATUS</p>
-            <h3 style='color: #22c55e; margin: 0;'>🟢 Secure & Online</h3>
-            <span style='color: #86efac; font-size: 0.75rem;'>RAG Engine Active</span>
-        </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
 # Sidebar for PDF Upload
 with st.sidebar:
     st.markdown("<h3 style='color: #06b6d4;'>📁 Document Hub</h3>", unsafe_allow_html=True)
