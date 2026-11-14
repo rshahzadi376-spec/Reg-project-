@@ -71,31 +71,38 @@ if not api_key:
 
 # Configure Google Generative AI
 genai.configure(api_key=api_key)
+
+
 @st.cache_data(ttl=3600)
 def get_available_models():
+    """Google se asli model list mangwata hai, taake purane naam na tootein."""
     names = []
-    for m in genai.list_models():
-        if "generateContent" in m.supported_generation_methods:
-            n = m.name.replace("models/", "")
-            if "flash" in n and not any(x in n for x in ["image", "tts", "live", "audio"]):
-                names.append(n)
-    names.sort(key=lambda x: ("lite" not in x, x))   # lite pehle (free quota zyada)
+    try:
+        for m in genai.list_models():
+            if "generateContent" in m.supported_generation_methods:
+                n = m.name.replace("models/", "")
+                if "flash" in n and not any(x in n for x in ["image", "tts", "live", "audio"]):
+                    names.append(n)
+    except Exception:
+        pass
+    names.sort(key=lambda x: ("lite" not in x, x))  # lite pehle (free quota zyada)
     return names[:4]
 
-# App Header (Updated as requested)
+
+# App Header
 st.markdown("<h1 style='color: #06b6d4; font-weight: 800; letter-spacing: -0.5px;'>🛡️ AI Knowledge Base System</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color: #9ca3af; font-size: 1.05rem;'>Intelligent Document Search & Real-time Q&A Command Center</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Sidebar for PDF Upload (Cleaned up Microsoft branding)
+# Sidebar for PDF Upload
 with st.sidebar:
     st.markdown("<h3 style='color: #06b6d4;'>📁 Document Hub</h3>", unsafe_allow_html=True)
     company_name = st.text_input("Organization / Topic", value="")
     uploaded_file = st.file_uploader("Upload New PDF Report", type=["pdf"])
-    
+
     if uploaded_file is not None:
         st.success(f"✓ Loaded: {uploaded_file.name}")
-    
+
     st.markdown("---")
     st.markdown("<p style='font-size: 0.8rem; color: #9ca3af;'>• Max Limit: 200MB<br>• Protocol: Secure Vector Search<br>• Model: Gemini Flash-Lite</p>", unsafe_allow_html=True)
 
@@ -117,7 +124,7 @@ user_question = st.text_input(
     placeholder="e.g., What are the main financial highlights and total revenue figures?"
 )
 
-# Button to get answer with Automatic Smart Retry & High-Quota Model Fallback
+# Button to get answer with automatic retry & model fallback
 if st.button("Get Answer"):
     if not user_question.strip():
         st.warning("Please enter a valid question first.")
@@ -125,11 +132,13 @@ if st.button("Get Answer"):
         with st.spinner("Processing through secure RAG pipeline (Auto-optimizing)..."):
             response_text = None
             last_error = None
-            # Using high-quota free tier models first
+            all_errors = []
             models_to_try = get_available_models()
-all_errors = []
-            
-            for attempt in range(2): 
+
+            if not models_to_try:
+                all_errors.append("Koi available model nahi mila. API key check karo.")
+
+            for attempt in range(2):
                 if response_text:
                     break
                 for m_name in models_to_try:
@@ -138,7 +147,7 @@ all_errors = []
                         prompt = f"""
                         You are a professional AI assistant analyzing uploaded enterprise documents.
                         Answer the following question accurately based on the text. If the information is not available, state clearly that it is not available.
-                        
+
                         Question: {user_question}
                         """
                         result = model.generate_content(prompt)
@@ -147,18 +156,18 @@ all_errors = []
                             break
                     except Exception as e:
                         last_error = str(e)
-all_errors.append(f"{m_name}: {e}")
+                        all_errors.append(f"{m_name}: {e}")
+                        time.sleep(1)
                         continue
-            
+
             if response_text:
                 st.markdown("---")
                 st.markdown("### 📝 Verified Intelligence Output")
                 st.info(response_text)
-                
+
                 with st.expander("🔍 Security & Full Vector Log"):
                     st.write("**Source Document:** Verified & Encrypted Document")
                     st.write("**Confidence Level:** 99.8% (High Precision Match)")
                     st.write("**Security Layer:** Smart Auto-Retry & Multi-Model Failover Active")
             else:
-                # Shows exact error if quota/issue occurs instead of a fake generic message
                 st.error("⚠️ Sab models fail hue:\n\n" + "\n\n".join(all_errors))
