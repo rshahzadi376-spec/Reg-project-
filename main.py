@@ -71,6 +71,16 @@ if not api_key:
 
 # Configure Google Generative AI
 genai.configure(api_key=api_key)
+@st.cache_data(ttl=3600)
+def get_available_models():
+    names = []
+    for m in genai.list_models():
+        if "generateContent" in m.supported_generation_methods:
+            n = m.name.replace("models/", "")
+            if "flash" in n and not any(x in n for x in ["image", "tts", "live", "audio"]):
+                names.append(n)
+    names.sort(key=lambda x: ("lite" not in x, x))   # lite pehle (free quota zyada)
+    return names[:4]
 
 # App Header (Updated as requested)
 st.markdown("<h1 style='color: #06b6d4; font-weight: 800; letter-spacing: -0.5px;'>🛡️ AI Knowledge Base System</h1>", unsafe_allow_html=True)
@@ -116,7 +126,8 @@ if st.button("Get Answer"):
             response_text = None
             last_error = None
             # Using high-quota free tier models first
-            models_to_try = ["gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-1.5-flash", "gemini-1.5-pro"]
+            models_to_try = get_available_models()
+all_errors = []
             
             for attempt in range(2): 
                 if response_text:
@@ -136,7 +147,7 @@ if st.button("Get Answer"):
                             break
                     except Exception as e:
                         last_error = str(e)
-                        time.sleep(1)
+all_errors.append(f"{m_name}: {e}")
                         continue
             
             if response_text:
@@ -150,4 +161,4 @@ if st.button("Get Answer"):
                     st.write("**Security Layer:** Smart Auto-Retry & Multi-Model Failover Active")
             else:
                 # Shows exact error if quota/issue occurs instead of a fake generic message
-                st.error(f"⚠️ API Error / Quota limit details: {last_error or 'Please wait 10 seconds and try again.'}")
+                st.error("⚠️ Sab models fail hue:\n\n" + "\n\n".join(all_errors))
